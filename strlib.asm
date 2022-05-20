@@ -49,17 +49,6 @@ universal_itoa:
             XOR   R8, R8
             XOR   R10, R10
             XOR   R9, R9
-; ? Searches the source operand (second operand) for the least significant set bit (1 bit). 
-; ? If a least significant 1 bit is found, its bit index is stored in the destination operand (first operand). 
-; ? The source operand can be a register or a memory location; the destination operand is a register. 
-            BSF   EDX, ECX ; ! SAVE least significant set bit in EDX
-; ? Searches the source operand (second operand) for the most significant set bit (1 bit). 
-; ? If a most significant 1 bit is found, its bit index is stored in the destination operand (first operand). 
-; ? The source operand can be a register or a memory location; the destination operand is a register.          
-            BSR   R8D, ECX ; ! SAVE most significant set bit in R8D
-            ; * ECX is 32-bit register, but R8 is 64-bit
-
-            JMP   .start_converting ; if least == most, then skip
 
 .start_converting:
             INC   R9                         ; ? R9 - current string index
@@ -68,8 +57,8 @@ universal_itoa:
             
             DIV   ECX                        ; ! divide EAX by ECX (base), put remainder in EDX  
                     
-            MOV   R8b, [hex_alphabet + EDX]  ; EDX is a remainder of division
-            MOV   [RDI], R8b                 ; put symbol in the string
+            MOV   R8B, [hex_alphabet + EDX]  ; EDX is a remainder of division
+            MOV   [RDI], R8B                 ; put symbol in the string
             INC   RDI                        ; RDI now points to the next index
 
             CMP   EAX, 0                     ; if EAX == 0, reverse string and finish, we no longer need to convert 

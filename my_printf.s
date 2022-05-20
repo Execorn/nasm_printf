@@ -162,14 +162,27 @@ print_oct:
 			CALL  universal_itoa
 			JMP   next_char
 
-demical:
+demical:	
 			ADD   RBP, 8
 			MOV   EAX, [RBP]
+
+			MOV   R11D, EAX
+			AND   R11D, 0x80000000	
+			CMP   R11D, 0
+			JNE   put_sign
+back:
 			MOV   ECX, int_base
 
 			CALL  universal_itoa
 			JMP   next_char
 
+put_sign:
+			MOV   [RDI], byte 0x2d                 ; put symbol in the string
+            INC   RDI 
+
+			DEC   EAX
+			XOR   EAX, 0xffffffff
+			JMP   back
 print_hex:
 			ADD   RBP, 8
 			MOV   EAX, [RBP]
@@ -210,6 +223,7 @@ end_printf:
 buffer_out: RESB buffer_size
 
 			section .rodata
+	
 stdout_d    	EQU 1  			; standart output descriptor 
 stdout_call 	EQU 1       	; syscall
 alignment 		EQU 8         	; sizeof(arg)
