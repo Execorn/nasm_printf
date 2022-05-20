@@ -177,7 +177,7 @@ back:
 			JMP   next_char
 
 put_sign:
-			MOV   [RDI], BYTE 0x2d                 ; put symbol in the string
+			MOV   [RDI], BYTE 0x2d                 ; put '-' in the string
             INC   RDI 
 
 			DEC   EAX
