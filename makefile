@@ -1,4 +1,4 @@
-execute: my_printf.out
+all: my_printf.out
 		./my_printf.out
 
 my_printf.out: main.obj my_printf.obj

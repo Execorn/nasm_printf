@@ -142,7 +142,7 @@ next_char:
 print_bin:
 			ADD   RBP, 8
 			MOV   EAX, [RBP]
-			MOV   ECX, bin_base	
+			MOV   ECX, bin_base
 
 			CALL  universal_itoa
 			JMP   next_char
@@ -220,7 +220,7 @@ oct_base 		EQU 8
 int_base 		EQU 10        
 hex_base 		EQU 16          
 
-buffer_size EQU 1024
+buffer_size EQU 512
 ;=====================================================================
 JUMP_TABLE: ; ? size of pointer - 8 bytes (DQ), so we shift to ('our symbol' - 'a') * 8
 DQ next_char
