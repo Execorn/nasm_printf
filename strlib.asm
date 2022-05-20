@@ -1,64 +1,111 @@
-copyString:
-    cmp   byte [rsi], 0
-    je    .exit
-    movsb
-    jmp   copyString
-.exit:
-    ret
+;   64-bit register | Lower 32 bits | Lower 16 bits | Lower 8 bits
+;   ==============================================================
+;   rax             | eax           | ax            | al
+;   rbx             | ebx           | bx            | bl
+;   rcx             | ecx           | cx            | cl
+;   rdx             | edx           | dx            | dl
+;   rsi             | esi           | si            | sil
+;   rdi             | edi           | di            | dil
+;   rbp             | ebp           | bp            | bpl
+;   rsp             | esp           | sp            | spl
+;>  r8              | r8d           | r8w           | r8b
+;>  r9              | r9d           | r9w           | r9b
+;>  r10             | r10d          | r10w          | r10b
+;   r11             | r11d          | r11w          | r11b
+;   r12             | r12d          | r12w          | r12b
+;   r13             | r13d          | r13w          | r13b
+;   r14             | r14d          | r14w          | r14b
+;   r15             | r15d          | r15w          | r15b
 
-itoa:       
-    xor   edx, edx
-    xor   r8, r8
-    xor   r10, r10
-    xor   r9, r9 ; r9 - strlen
 
-    bsf   edx, ecx 
-    bsr   r8d, ecx
-    cmp   edx, r8d ; if ecx has only one non-0 bit (binary logarithm)
-    jne   .slow_convert
-            
-    push cx
-    mov cx, r8w
 
-.slow_convert:
-    inc   r9
+;------------------------------------------------------------------------------
+; ! COPY STRING FROM ES:[DI] to DS:[SI]
+; ? ARGUMENTS:
+; * 1) RSI - string pointer
+; ! NOTHING GETS DESTROYED
+;------------------------------------------------------------------------------
+move_string:
+            CMP   BYTE [RSI], 0 ; ? check for NULL-byte
+            JE    .finish
 
-    xor   edx, edx
-    div   ecx
-            
-    mov   r8, [hex_radix + edx]
-    mov   [rdi], r8
-    inc   rdi
+            MOVSB               ; * MOV ES:[DI], DS:[SI] is where we actually copy
+            JMP   move_string
 
-    cmp   eax, 0
-    jne   .slow_convert
+.finish:
+            RET
 
-.reverse:
-    push rdi
-    sub rdi, r9 ; start string addr
-    call reverse_buf
-    pop rdi
+;------------------------------------------------------------------------------
+; ! CONVERT INTEGER TO STRING
+; ? ARGUMENTS:
+; * 1) EAX - integer
+; * 2) ECX - base
+; * 3) RDI - string pointer (output buffer)
+; ! EDX, R[8-10] GET DESTROYED
+;------------------------------------------------------------------------------
+universal_itoa:       
+            ;> put zeros in registers
+            XOR   EDX, EDX
+            XOR   R8, R8
+            XOR   R10, R10
+            XOR   R9, R9
+; ? Searches the source operand (second operand) for the least significant set bit (1 bit). 
+; ? If a least significant 1 bit is found, its bit index is stored in the destination operand (first operand). 
+; ? The source operand can be a register or a memory location; the destination operand is a register. 
+            BSF   EDX, ECX ; ! SAVE least significant set bit in EDX
+; ? Searches the source operand (second operand) for the most significant set bit (1 bit). 
+; ? If a most significant 1 bit is found, its bit index is stored in the destination operand (first operand). 
+; ? The source operand can be a register or a memory location; the destination operand is a register.          
+            BSR   R8D, ECX ; ! SAVE most significant set bit in R8D
+            ; * ECX is 32-bit register, but R8 is 64-bit
+            CMP   EDX, R8D
+            JNE   .start_converting ; if least == most, then skip
+                    
+            PUSH CX
+            MOV CX, R8W ; R8W is used because CX is 16-bit register
 
-    ret
+.start_converting:
+            INC   R9                        ; ? R9 - current string index
 
-reverse_buf:
-    mov r8, rdi ; rdi - left addr
-    add r8, r9 ; r8 - rigth addr
-    dec r8
+            XOR   EDX, EDX
+            DIV   ECX                       ; ! divide EAX by ECX (base), put remainder in EDX  
+                    
+            MOV   R8, [hex_alphabet + EDX]  ; EDX is a remainder of division
+            MOV   [RDI], R8                 ; put symbol in the string
+            INC   RDI                       ; RDI now points to the next index
 
-.next_elem:
-    mov r9b, [rdi]
-    mov r10b, [r8]
-    mov [rdi], r10b
-    mov [r8], r9b
+            CMP   EAX, 0                    ; if EAX == 0, reverse string and finish, we no longer need to convert 
+            JNE   .start_converting
 
-    inc rdi
-    dec r8
+.reverse_result:
+            PUSH RDI
+            SUB RDI, R9 ; start string addr
 
-    cmp rdi, r8
-    jl .next_elem
+            CALL buffer_fill_reversed
+            POP RDI
 
-    ret
+            RET
+
+buffer_fill_reversed:
+            MOV R8, RDI  ; RDI - pointer to left side of string
+            ADD R8, R9   ; R8  - pointer to right side of string, R9 is current index to copy
+
+            DEC R8
+
+.again:
+            MOV R9B, [RDI]
+            MOV R10B, [R8]
+
+            MOV [RDI], R10B ; put it back in the memory
+            MOV [R8],   R9B
+
+            INC RDI
+            DEC R8
+
+            CMP RDI, R8
+            JL .again ; if RDI < R8, do it again, string is not finished yet
+
+            RET
 
 section .rodata
-hex_radix: db "0123456789ABCDEF"
+hex_alphabet: db "0123456789ABCDEF"
