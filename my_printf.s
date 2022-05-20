@@ -136,7 +136,7 @@ next_char:
 			JE     str_char
 			LODSB                               ; * MOV AL, DS:[SI]
 
-			; ! RAX contains current char (its ASCII-code), 'b' is a beginning of JMP_TABLE 
+			; ! RAX contains current char (its ASCII-code), 'a' is a beginning of JMP_TABLE 
 			JMP   [JUMP_TABLE + (RAX - 'a') * 8]
 
 print_bin:
@@ -162,7 +162,7 @@ print_oct:
 			CALL  universal_itoa
 			JMP   next_char
 
-demical:	
+print_integer:	
 			ADD   RBP, 8
 			MOV   EAX, [RBP]
 
@@ -239,7 +239,7 @@ JUMP_TABLE: ; ? size of pointer - 8 bytes (DQ), so we shift to ('our symbol' - '
 DQ next_char
 DQ print_bin
 DQ print_char
-DQ demical
+DQ print_integer
 times 10 DQ next_char ; * from 'e' to 'n'
 DQ print_oct
 times 3 DQ next_char  ; * 'p', 'q', 'r'
