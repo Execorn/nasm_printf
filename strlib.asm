@@ -58,23 +58,21 @@ universal_itoa:
 ; ? The source operand can be a register or a memory location; the destination operand is a register.          
             BSR   R8D, ECX ; ! SAVE most significant set bit in R8D
             ; * ECX is 32-bit register, but R8 is 64-bit
-            CMP   EDX, R8D
-            JNE   .start_converting ; if least == most, then skip
-                    
-            PUSH CX
-            MOV CX, R8W ; R8W is used because CX is 16-bit register
+
+            JMP   .start_converting ; if least == most, then skip
 
 .start_converting:
-            INC   R9                        ; ? R9 - current string index
+            INC   R9                         ; ? R9 - current string index
 
             XOR   EDX, EDX
-            DIV   ECX                       ; ! divide EAX by ECX (base), put remainder in EDX  
+            
+            DIV   ECX                        ; ! divide EAX by ECX (base), put remainder in EDX  
                     
             MOV   R8b, [hex_alphabet + EDX]  ; EDX is a remainder of division
             MOV   [RDI], R8b                 ; put symbol in the string
-            INC   RDI                       ; RDI now points to the next index
+            INC   RDI                        ; RDI now points to the next index
 
-            CMP   EAX, 0                    ; if EAX == 0, reverse string and finish, we no longer need to convert 
+            CMP   EAX, 0                     ; if EAX == 0, reverse string and finish, we no longer need to convert 
             JNE   .start_converting
 
 .reverse_result:
