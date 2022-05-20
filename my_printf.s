@@ -180,8 +180,9 @@ put_sign:
 			MOV   [RDI], BYTE 0x2d                 ; put '-' in the string
             INC   RDI 
 
-			DEC   EAX
-			XOR   EAX, 0xffffffff
+			NEG   EAX
+			;DEC   EAX
+			;NOT   EAX                              ; EAX = ~EAX
 			JMP   back
 print_hex:
 			ADD   RBP, 8

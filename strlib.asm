@@ -50,6 +50,7 @@ universal_itoa:
             XOR   R10, R10
             XOR   R9, R9
 
+
 .start_converting:
             INC   R9                         ; ? R9 - current string index
 
