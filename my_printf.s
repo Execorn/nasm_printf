@@ -125,14 +125,14 @@ _my_printf:
 next_char:
 			XOR    RAX, RAX 					; MOV RAX, 0
 
-			CMP    byte [RSI], 0 				; ! if we found NULL-byte (end of c-style string)
+			CMP    BYTE [RSI], 0 				; ! if we found NULL-BYTE (end of c-style string)
 			JE     end_printf 					; printing out
 
-			CMP    byte [RSI], '%'				; if we found format specifier 
+			CMP    BYTE [RSI], '%'				; if we found format specifier 
 			JNE    str_char
 			INC    RSI
 
-			CMP    byte [RSI], '%' 				; ? if we found '%%', so we need to print '%'
+			CMP    BYTE [RSI], '%' 				; ? if we found '%%', so we need to print '%'
 			JE     str_char
 			LODSB                               ; * MOV AL, DS:[SI]
 
@@ -177,7 +177,7 @@ back:
 			JMP   next_char
 
 put_sign:
-			MOV   [RDI], byte 0x2d                 ; put symbol in the string
+			MOV   [RDI], BYTE 0x2d                 ; put symbol in the string
             INC   RDI 
 
 			DEC   EAX
@@ -222,8 +222,7 @@ end_printf:
 			section .bss
 buffer_out: RESB buffer_size
 
-			section .rodata
-	
+			section .rodata	
 stdout_d    	EQU 1  			; standart output descriptor 
 stdout_call 	EQU 1       	; syscall
 alignment 		EQU 8         	; sizeof(arg)
