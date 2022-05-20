@@ -137,7 +137,7 @@ next_char:
 			LODSB                               ; * MOV AL, DS:[SI]
 
 			; ! RAX contains current char (its ASCII-code), 'b' is a beginning of JMP_TABLE 
-			JMP   [JUMP_TABLE + (RAX - 'b') * 8]
+			JMP   [JUMP_TABLE + (RAX - 'a') * 8]
 
 print_bin:
 			ADD   RBP, 8
@@ -222,7 +222,8 @@ hex_base 		EQU 16
 
 buffer_size EQU 1024
 ;=====================================================================
-JUMP_TABLE: ; ? size of pointer - 8 bytes (DQ), so we shift to ('our symbol' - 'b') * 8
+JUMP_TABLE: ; ? size of pointer - 8 bytes (DQ), so we shift to ('our symbol' - 'a') * 8
+DQ next_char
 DQ print_bin
 DQ print_char
 DQ demical
@@ -232,3 +233,4 @@ times 3 DQ next_char  ; * 'p', 'q', 'r'
 DQ print_string
 times 4 DQ next_char  ; * to 'x'
 DQ print_hex
+times 2 DQ next_char

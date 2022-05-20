@@ -70,8 +70,8 @@ universal_itoa:
             XOR   EDX, EDX
             DIV   ECX                       ; ! divide EAX by ECX (base), put remainder in EDX  
                     
-            MOV   R8, [hex_alphabet + EDX]  ; EDX is a remainder of division
-            MOV   [RDI], R8                 ; put symbol in the string
+            MOV   R8b, [hex_alphabet + EDX]  ; EDX is a remainder of division
+            MOV   [RDI], R8b                 ; put symbol in the string
             INC   RDI                       ; RDI now points to the next index
 
             CMP   EAX, 0                    ; if EAX == 0, reverse string and finish, we no longer need to convert 
@@ -108,4 +108,4 @@ buffer_fill_reversed:
             RET
 
 section .rodata
-hex_alphabet: db "0123456789ABCDEF"
+hex_alphabet: db "0123456789ABCDEF" 
